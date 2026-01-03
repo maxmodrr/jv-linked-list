@@ -1,7 +1,6 @@
 package core.basesyntax;
 
 import java.util.List;
-import java.util.Objects;
 
 public class MyLinkedList<T> implements MyLinkedListInterface<T> {
     private static final int DEFAULT_SIZE = 0;
@@ -94,26 +93,7 @@ public class MyLinkedList<T> implements MyLinkedListInterface<T> {
         }
         T removedValue;
 
-        if (size == 1) {
-            removedValue = head.value;
-            head = null;
-            tail = null;
-        } else if (index == 0) {
-            removedValue = head.value;
-            head.next.prev = null;
-            head = head.next;
-        } else if (index == size - 1) {
-            removedValue = tail.value;
-            tail = tail.prev;
-            tail.next = null;
-        } else {
-            Node<T> currentNode = getNodeByIndex(index);
-            removedValue = currentNode.value;
-            currentNode.prev.next = currentNode.next;
-            currentNode.next.prev = currentNode.prev;
-        }
-        size--;
-        return removedValue;
+        return unlink(getNodeByIndex(index));
     }
 
     @Override
@@ -125,23 +105,8 @@ public class MyLinkedList<T> implements MyLinkedListInterface<T> {
         Node<T> current = head;
 
         while (current != null) {
-            if (Objects.equals(current.value, object)) {
-                if (current == head) {
-                    head = current.next;
-                    if (head != null) {
-                        head.prev = null;
-                    } else {
-                        tail = null;
-                    }
-                } else if (current == tail) {
-                    tail = current.prev;
-                    tail.next = null;
-                } else {
-                    current.prev.next = current.next;
-                    current.next.prev = current.prev;
-                }
-
-                size--;
+            if (object == null ? current.value == null : object.equals(current.value)) {
+                unlink(current);
                 return true;
             }
 
@@ -178,6 +143,24 @@ public class MyLinkedList<T> implements MyLinkedListInterface<T> {
     private void setTail(T value) {
         tail.next = new Node<>(tail, value, null);
         tail = tail.next;
+    }
+
+    private T unlink(Node<T> node) {
+        final T value = node.value;
+        if (node.prev == null) {
+            head = node.next;
+        } else {
+            node.prev.next = node.next;
+        }
+
+        if (node.next == null) {
+            tail = node.prev;
+        } else {
+            node.next.prev = node.prev;
+        }
+
+        size--;
+        return value;
     }
 
     private Node<T> getNodeByIndex(int index) {
